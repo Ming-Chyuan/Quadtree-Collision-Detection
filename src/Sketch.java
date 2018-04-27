@@ -56,13 +56,13 @@ public class Sketch extends PApplet {
 		Quadtree quadtree = new Quadtree(this, boundary);
 
 		for(Ball b : balls) {
-			if(useQaudtree) quadtree.insert(b);
 			b.move();
 			b.show();
+			b.setHighlight(false);
+			if(useQaudtree) quadtree.insert(b);
 		}
 
 		for(Ball b : balls) {
-			b.setHighlight(false);
 			Circle range = new Circle(b.pos.x, b.pos.y, b.r + maxR);
 			ArrayList<Ball> findings = quadtree.queryRange(range);
 			for(Ball other : useQaudtree ? findings : balls) { // findings: n log n, balls: n^2
@@ -70,11 +70,14 @@ public class Sketch extends PApplet {
 					if(useQaudtree) {
 						showSearchingRange(range);
 					} else {
-						showSearchingRange(b, other);
+						if(balls.indexOf(other) > balls.indexOf(b)) {
+							showSearchingRange(b, other);
+						}
 					}
 				}
-				if(b != other && b.intersects(other)) {
+				if(b != other && b.intersects(other) && balls.indexOf(other) > balls.indexOf(b)) {
 					b.setHighlight(true);
+					other.setHighlight(true);
 					collisions++;
 				}
 			}
@@ -130,7 +133,7 @@ public class Sketch extends PApplet {
 		fill(255, 255, 0);
 		text("FPS: " + (int)frameRate, w, h += margin);
 		text("Balls: " + balls.size(), w, h += margin);
-		text("Collisions: " + collisions / 2, w, h += margin);
+		text("Collisions: " + collisions, w, h += margin);
 		
 		w += 300;
 		h = canvasHeight + margin;
